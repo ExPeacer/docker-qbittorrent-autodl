@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv bash
+
+_term() {
+	echo "Caught SIGTERM for autodl!"
+	killall -s SIGTERM irssi 2>/dev/null
+}
+
+trap _term SIGTERM
+
+AUTODL_LOCK="/detach_sess/.autodl"
+echo "# Checking irssi/autodl session lock ${AUTODL_LOCK}"
+# Check if session lock wasn't deleted
+if [ -S "${AUTODL_LOCK}" ] && ! pgrep irssi > /dev/null; then
+	echo "# irssi/autodl process not found, removing session lock ${AUTODL_LOCK}"
+	rm -f "${AUTODL_LOCK}"
+fi
+
+HOME=/config exec s6-setuidgid abc dtach -N "${AUTODL_LOCK}" \
+	/usr/bin/irssi --home=/config/.irssi &
+
+DTACH_PID=$!
+echo "# irssi/autodl dtach session started ${DTACH_PID}"
+wait ${DTACH_PID}
+echo "# irssi/autodl dtach session finished ${DTACH_PID}"
+
+sleep 1

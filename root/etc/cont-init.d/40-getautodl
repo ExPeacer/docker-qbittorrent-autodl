@@ -1,0 +1,49 @@
+#!/usr/bin/with-contenv bash
+
+# create .autodl config dir
+[[ ! -d /config/.autodl ]] && (mkdir /config/.autodl && chown -R abc:abc /config/.autodl)
+[[ ! -d /home/abc ]] && (mkdir /home/abc && chown -R abc:abc /home/abc)
+
+# get autodl-irssi
+[[ ! -d /config/.irssi/scripts/.git ]] && (
+	mkdir -p /config/.irssi/scripts && \
+	git clone --depth 1 --single-branch \
+		https://github.com/autodl-community/autodl-irssi.git \
+		/config/.irssi/scripts && \
+	mkdir -p /config/.irssi/scripts/autorun && \
+	ln -s /config/.irssi/scripts/autodl-irssi.pl /config/.irssi/scripts/autorun/autodl-irssi.pl
+)
+
+# get autodl-trackers
+[[ ! -d /config/.irssi/trackers/.git ]] && (
+	mkdir -p /config/.irssi/trackers && \
+	git clone --depth 1 --single-branch \
+		https://github.com/ExPeacer/autodl-trackers.git \
+		/config/.irssi/trackers && \
+	ln -s /config/.irssi/trackers/trackers /config/.irssi/scripts/AutodlIrssi/trackers
+)
+
+# make sure perl is in irssi startup
+echo "load perl" > /config/.irssi/startup
+
+# update autodl script for irssi
+git -C /config/.irssi/scripts pull
+
+# update autodl trackers
+git -C /config/.irssi/trackers clean -fd
+git -C /config/.irssi/trackers reset --hard -q
+git -C /config/.irssi/trackers pull
+
+# copy config files/set links etc...
+[[ ! -L /home/abc/.autodl ]] && ln -s /config/.autodl /home/abc/.autodl
+[[ ! -L /config/.irssi/scripts/autorun/autodl-irssi.pl ]] && ln -s /config/.irssi/scripts/autodl-irssi.pl /config/.irssi/scripts/autorun/autodl-irssi.pl
+[[ ! -L /config/.irssi/scripts/AutodlIrssi/trackers ]] && (
+	rm -rf /config/.irssi/scripts/AutodlIrssi/trackers && \
+	ln -s /config/.irssi/trackers/trackers /config/.irssi/scripts/AutodlIrssi/trackers
+)
+
+[[ ! -f /config/.autodl/autodl.cfg ]] && cp /defaults/autodl/autodl.cfg /config/.autodl/autodl.cfg
+
+# Detach session folder
+mkdir -p /detach_sess
+chown -R abc:abc /detach_sess

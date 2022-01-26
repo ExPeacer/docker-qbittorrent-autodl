@@ -1,0 +1,14 @@
+#!/usr/bin/with-contenv bash
+
+# make folders
+mkdir -p \
+	/downloads{/completed,/incoming,/watched} \
+
+# permissions
+chown abc:abc \
+	/downloads \
+	/downloads{/completed,/incoming,/watched}
+
+chown -R abc:abc \
+	/config \
+	/run
