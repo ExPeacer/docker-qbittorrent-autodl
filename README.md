@@ -4,7 +4,7 @@ Based on *linuxserver/qbittorrent* & *horjulf/docker-rutorrent-autodl*. Big than
 ## Usage
 
 ```bash
-docker run -d
+docker run -d \
   --name=qbittorrent-autodl \
   -e PGID=1000 -e PUID=1000 \
   -e TZ=Europe/Budapest \
